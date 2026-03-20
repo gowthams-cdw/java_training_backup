@@ -1,0 +1,8 @@
+{
+    "java.project.sourcePaths": [
+        "jdbc_test/src"
+    ],
+    "java.project.referencedLibraries": [
+        "/Users/gowthams/Downloads/postgresql-42.7.10.jar"
+    ]
+}

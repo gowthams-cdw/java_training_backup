@@ -1,0 +1,6 @@
+run:
+  @echo "Compiling files..."
+  javac -d out $(find src -name "*java")
+
+  @echo "Running program..."
+  java -cp out LibraryTracker
