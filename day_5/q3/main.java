@@ -7,19 +7,30 @@ import java.util.Scanner;
 import java.util.concurrent.CompletableFuture;
 
 class CompleteableDemo {
-  private static final String URL = "jdbc:postgresql://localhost:5432/student";
-  private static final String USERNAME = "gowthams";
-  private static final String PASSWORD = "SGM02468";
+  // private static final String URL = "jdbc:postgresql://localhost:5432/student";
+  // private static final String USERNAME = "gowthams";
+  // private static final String PASSWORD = "SGM02468";
 
   public static void main(String[] args) {
+    if (args.length != 3) {
+      System.out.println("Invalid usage: <program_name> <url> <username> <password>");
+      return;
+    }
+
+    String URL = args[0];
+    String USERNAME = args[1];
+    String PASSWORD = args[2];
+
     Scanner sc = new Scanner(System.in);
 
     try (Connection conn = DriverManager.getConnection(URL, USERNAME, PASSWORD)) {
       System.out.print("Enter sudent id to generate report: ");
       int id = sc.nextInt();
 
-      CompletableFuture<Void> marksFuture =
-          CompletableFuture.runAsync(
+      // CompletableFuture<Void> marksFuture =
+      // CompletableFuture.runAsync(
+      CompletableFuture<String> marksFuture =
+          CompletableFuture.supplyAsync(
               () -> {
                 String query =
                     "select max(marks) as high, avg(marks) as avg from marks where id = ?";
@@ -31,17 +42,19 @@ class CompleteableDemo {
                       int maxMark = rs.getInt("high");
                       double avgMark = rs.getDouble("avg");
 
-                      System.out.println("i. max mark: " + maxMark);
-                      System.out.println("ii. avg mark: " + avgMark);
+                      return "i. max mark: " + maxMark + "\n" + "ii. avg mark: " + avgMark;
                     }
                   }
                 } catch (SQLException e) {
-                  System.out.println("Error fetching student marks.");
+                  return "Error fetching student marks.";
                 }
+                return "";
               });
 
-      CompletableFuture<Void> attendenceFuture =
-          CompletableFuture.runAsync(
+      // CompletableFuture<Void> attendenceFuture =
+      //     CompletableFuture.runAsync(
+      CompletableFuture<String> attendanceFuture =
+          CompletableFuture.supplyAsync(
               () -> {
                 String query =
                     "select count(*) as total, "
@@ -55,18 +68,27 @@ class CompleteableDemo {
                       int total = rs.getInt("total");
                       int present = rs.getInt("present");
 
-                      System.out.println("iii. Total: " + total);
-                      System.out.println("iv. Present days: " + present);
-                      System.out.println("v. Attendence percentage: " + total / present);
+                      return "iii. Total: "
+                          + total
+                          + "\n"
+                          + "iv. Present days: "
+                          + present
+                          + "\n"
+                          + "v. Attendance %: "
+                          + total / present;
                     }
                   }
                 } catch (SQLException e) {
-                  System.out.println("Error fetching student marks.");
+                  return "Error fetching student marks.";
                 }
+                return "";
               });
 
       System.out.println("Student Report: ");
-      // CompletableFuture.allOf(marksFuture, attendenceFuture).join();
+
+      CompletableFuture.allOf(marksFuture, attendanceFuture).join();
+      System.out.println(marksFuture.join());
+      System.out.println(attendanceFuture.join());
     } catch (SQLException e) {
       e.printStackTrace();
     }

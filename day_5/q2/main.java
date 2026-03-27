@@ -5,11 +5,20 @@ import java.sql.SQLException;
 import java.util.Scanner;
 
 class JDBCSample {
-  private static final String URL = "jdbc:postgresql://localhost:5432/java_training";
-  private static final String USERNAME = "gowthams";
-  private static final String PASSWORD = "SGM02468";
+  // private static final String URL = "jdbc:postgresql://localhost:5432/java_training";
+  // private static final String USERNAME = "gowthams";
+  // private static final String PASSWORD = "SGM02468";
 
   public static void main(String[] args) {
+    if (args.length != 3) {
+      System.out.println("Invalid usage: <program_name> <url> <username> <password>");
+      return;
+    }
+
+    String URL = args[0];
+    String USERNAME = args[1];
+    String PASSWORD = args[2];
+
     Scanner sc = new Scanner(System.in);
 
     try (Connection conn = DriverManager.getConnection(URL, USERNAME, PASSWORD)) {
@@ -19,7 +28,7 @@ class JDBCSample {
       while (choice != 4) {
         switch (choice) {
           case 1 -> createUser(conn, sc);
-          case 2 -> transactMoney(conn, sc);
+          case 2 -> getTransactionInfo(conn, sc);
           case 3 -> showUsers(conn, sc);
           case 4 -> System.out.println("GoodBye");
           default -> System.out.println("Invalid choice.");
@@ -53,13 +62,38 @@ class JDBCSample {
       pStatement.setString(1, username);
       pStatement.setInt(2, amount);
 
-      pStatement.execute();
+      int rows = pStatement.executeUpdate();
+
+      if (rows == 1) {
+        System.out.println("User created successfully.");
+      } else {
+        System.out.println("User creation failed.");
+      }
     } catch (SQLException e) {
       e.printStackTrace();
     }
   }
 
-  public static void transactMoney(Connection conn, Scanner sc) {
+  public static boolean userExists(Connection conn, int userId) {
+    String query = "select 1 from users where id = ?";
+
+    try (PreparedStatement ps = conn.prepareStatement(query)) {
+      ps.setInt(1, userId);
+
+      try (var rs = ps.executeQuery()) {
+        if (!rs.next()) {
+          return false;
+        }
+        return true;
+      }
+
+    } catch (SQLException e) {
+      e.printStackTrace();
+      return false;
+    }
+  }
+
+  public static void getTransactionInfo(Connection conn, Scanner sc) {
     System.out.print("Enter source account no.: ");
     int src = sc.nextInt();
 
@@ -74,6 +108,21 @@ class JDBCSample {
       return;
     }
 
+    if (src == dest) {
+      System.out.println("Cannot transfer to same account.");
+      return;
+    }
+
+    if (!userExists(conn, src)) {
+      System.out.println("Source user does not exist.");
+      return;
+    }
+
+    if (!userExists(conn, dest)) {
+      System.out.println("Destination user does not exist.");
+      return;
+    }
+
     String query = "select amount from users where id = ?";
     try (PreparedStatement pStatement = conn.prepareStatement(query)) {
       pStatement.setInt(1, src);
@@ -84,7 +133,7 @@ class JDBCSample {
 
           if (currentBalance >= amount) {
             System.out.println("Sufficient balance. Processing payments...");
-            transerMoney(conn, src, dest, amount);
+            transferMoney(conn, src, dest, amount);
           } else {
             System.out.println("Insufficient balance");
             return;
@@ -96,36 +145,49 @@ class JDBCSample {
     }
   }
 
-  private static void transerMoney(Connection conn, int src, int dest, int amount) {
+  private static void transferMoney(Connection conn, int src, int dest, int amount) {
     try {
-      try {
-        conn.setAutoCommit(false);
+      conn.setAutoCommit(false);
 
-        String query = "update users set amount = amount - ? where id = ?";
-        try (PreparedStatement pStatement = conn.prepareStatement(query)) {
-          pStatement.setInt(1, amount);
-          pStatement.setInt(2, src);
-          pStatement.executeUpdate();
+      String query = "update users set amount = amount - ? where id = ?";
+      try (PreparedStatement pStatement = conn.prepareStatement(query)) {
+        pStatement.setInt(1, amount);
+        pStatement.setInt(2, src);
+
+        int rows = pStatement.executeUpdate();
+        if (rows != 1) {
+          throw new SQLException("Debit failed for source account.");
         }
-
-        query = "update users set amount = amount + ? where id = ?";
-        try (PreparedStatement pStatement = conn.prepareStatement(query)) {
-          pStatement.setInt(1, amount);
-          pStatement.setInt(2, dest);
-          pStatement.executeUpdate();
-        }
-
-        System.out.println("Transaction completed successfully.");
-        conn.commit();
-      } catch (SQLException e) {
-        conn.rollback();
-        System.out.println("Transaction failed. rollback successfully.");
-        e.printStackTrace();
-      } finally {
-        conn.setAutoCommit(true);
       }
+
+      query = "update users set amount = amount + ? where id = ?";
+      try (PreparedStatement pStatement = conn.prepareStatement(query)) {
+        pStatement.setInt(1, amount);
+        pStatement.setInt(2, dest);
+
+        int rows = pStatement.executeUpdate();
+        if (rows != 1) {
+          throw new SQLException("Debit failed for source account.");
+        }
+      }
+
+      System.out.println("Transaction completed successfully.");
+      conn.commit();
     } catch (SQLException e) {
+      try {
+        conn.rollback();
+        System.out.println("Transaction failed. Rollback successful.");
+      } catch (SQLException rollbackEx) {
+        System.out.println("Rollback failed!");
+        rollbackEx.printStackTrace();
+      }
       e.printStackTrace();
+    } finally {
+      try {
+        conn.setAutoCommit(true);
+      } catch (SQLException e) {
+        e.printStackTrace();
+      }
     }
   }
 
