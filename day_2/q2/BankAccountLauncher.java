@@ -2,18 +2,37 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
-class BankAccount {
-  static Map<Integer, BankAccount> idToAccountMap = new HashMap<>();
-  private static Map<Integer, String> idToPassword = new HashMap<>();
-
-  private static int accountsCount;
-
-  private int id;
+abstract class BankAccount {
+  int id;
   String name;
   String branch;
   float balance;
 
-  BankAccount(String name, String password) {
+  abstract void withdraw(int amount);
+
+  /**
+   * @return String
+   */
+  public String toString() {
+    return """
+    Account Details:
+      - ID: %s
+      - Name: %s
+      - Branch: %s
+      - Balance: %s
+    """
+        .formatted(id, name, branch, balance);
+  }
+}
+
+class HDFCBankAccount extends BankAccount {
+  static Map<Integer, HDFCBankAccount> idToAccountMap = new HashMap<>();
+  private static Map<Integer, String> idToPassword = new HashMap<>();
+
+  private static int accountsCount;
+  private int id;
+
+  HDFCBankAccount(String name, String password) {
     accountsCount++;
     id = accountsCount;
 
@@ -23,7 +42,7 @@ class BankAccount {
     idToAccountMap.put(id, this);
   }
 
-  BankAccount(String name, String password, String branch, float balance) {
+  HDFCBankAccount(String name, String password, String branch, float balance) {
     accountsCount++;
     id = accountsCount;
 
@@ -147,23 +166,9 @@ class BankAccount {
     dest.balance += amount;
     System.out.println("Transaction completed successfully!");
   }
-
-  /**
-   * @return String
-   */
-  public String toString() {
-    return """
-    Account Details:
-      - ID: %s
-      - Name: %s
-      - Branch: %s
-      - Balance: %s
-    """
-        .formatted(id, name, branch, balance);
-  }
 }
 
-class BankAccountLauncher {
+public class BankAccountLauncher {
   private static void printMenu() {
     System.out.println(
         """
@@ -179,18 +184,18 @@ class BankAccountLauncher {
   }
 
   public static void main(String[] args) {
-    BankAccount account1 = new BankAccount("x1", "p1");
-    System.out.println(BankAccount.idToAccountMap);
+    BankAccount account1 = new HDFCBankAccount("x1", "p1");
+    System.out.println(HDFCBankAccount.idToAccountMap);
 
     System.out.println();
-    BankAccount account2 = new BankAccount("x2", "p2", "y2", 1000);
-    System.out.println(BankAccount.idToAccountMap);
+    BankAccount account2 = new HDFCBankAccount("x2", "p2", "y2", 1000);
+    System.out.println(HDFCBankAccount.idToAccountMap);
 
-    BankAccount.transferAmount(account1, account2, 1000);
-    BankAccount.deposit(account1, 1000);
+    HDFCBankAccount.transferAmount(account1, account2, 1000);
+    HDFCBankAccount.deposit(account1, 1000);
 
     System.out.println();
-    BankAccount.transferAmount(account1, account2, 500);
+    HDFCBankAccount.transferAmount(account1, account2, 500);
 
     System.out.println(account1);
     System.out.println(account2);
@@ -225,37 +230,37 @@ class BankAccountLauncher {
             throw new Error("Password Mismatch");
           }
 
-          BankAccount newAccount = new BankAccount(name, password, branch, amount);
-          BankAccount.idToAccountMap.put(newAccount.getId(), newAccount);
+          HDFCBankAccount newAccount = new HDFCBankAccount(name, password, branch, amount);
+          HDFCBankAccount.idToAccountMap.put(newAccount.getId(), newAccount);
         }
         case 2 -> {
           System.out.print("Enter account no. to deposit: ");
           int accoutNo = sc.nextInt();
 
-          if (!BankAccount.idToAccountMap.containsKey(accoutNo)) {
+          if (!HDFCBankAccount.idToAccountMap.containsKey(accoutNo)) {
             throw new Error("Invalid Account number.");
           }
 
           System.out.print("Enter amount to deposit: ");
           int amount = sc.nextInt();
 
-          BankAccount.deposit(BankAccount.idToAccountMap.get(accoutNo), amount);
+          HDFCBankAccount.deposit(HDFCBankAccount.idToAccountMap.get(accoutNo), amount);
         }
         case 3 -> {
           System.out.print("Enter account no. to withdraw from: ");
           int accoutNo = sc.nextInt();
 
-          if (!BankAccount.idToAccountMap.containsKey(accoutNo)) {
+          if (!HDFCBankAccount.idToAccountMap.containsKey(accoutNo)) {
             throw new Error("Invalid Account number.");
           }
 
-          BankAccount account = BankAccount.idToAccountMap.get(accoutNo);
+          BankAccount account = HDFCBankAccount.idToAccountMap.get(accoutNo);
 
           sc.nextLine();
           System.out.print("Enter password: ");
           String password = sc.nextLine();
 
-          if (!BankAccount.checkPassword(accoutNo, password)) {
+          if (!HDFCBankAccount.checkPassword(accoutNo, password)) {
             throw new Error("Invalid password.");
           }
 
@@ -268,7 +273,7 @@ class BankAccountLauncher {
           System.out.print("Enter account no. to withdraw from: ");
           int srcAccoutNo = sc.nextInt();
 
-          if (!BankAccount.idToAccountMap.containsKey(srcAccoutNo)) {
+          if (!HDFCBankAccount.idToAccountMap.containsKey(srcAccoutNo)) {
             throw new Error("Invalid Account number.");
           }
 
@@ -276,35 +281,35 @@ class BankAccountLauncher {
           System.out.print("Enter password: ");
           String password = sc.nextLine();
 
-          if (!BankAccount.checkPassword(srcAccoutNo, password)) {
+          if (!HDFCBankAccount.checkPassword(srcAccoutNo, password)) {
             throw new Error("Invalid password.");
           }
 
-          BankAccount srcAccount = BankAccount.idToAccountMap.get(srcAccoutNo);
+          BankAccount srcAccount = HDFCBankAccount.idToAccountMap.get(srcAccoutNo);
 
           System.out.print("Enter account no. to deposit to: ");
           int destAccoutNo = sc.nextInt();
 
-          if (!BankAccount.idToAccountMap.containsKey(destAccoutNo)) {
+          if (!HDFCBankAccount.idToAccountMap.containsKey(destAccoutNo)) {
             throw new Error("Invalid Account number.");
           }
 
-          BankAccount destAccount = BankAccount.idToAccountMap.get(destAccoutNo);
+          BankAccount destAccount = HDFCBankAccount.idToAccountMap.get(destAccoutNo);
 
           System.out.print("Enter amount to transfer: ");
           int amount = sc.nextInt();
 
-          BankAccount.transferAmount(srcAccount, destAccount, amount);
+          HDFCBankAccount.transferAmount(srcAccount, destAccount, amount);
         }
         case 5 -> {
           System.out.print("Enter account no.: ");
           int accoutNo = sc.nextInt();
 
-          if (!BankAccount.idToAccountMap.containsKey(accoutNo)) {
+          if (!HDFCBankAccount.idToAccountMap.containsKey(accoutNo)) {
             throw new Error("Invalid Account number.");
           }
 
-          BankAccount account = BankAccount.idToAccountMap.get(accoutNo);
+          BankAccount account = HDFCBankAccount.idToAccountMap.get(accoutNo);
           System.out.println(account);
         }
         default -> System.out.println("Invalid choice!");
@@ -317,3 +322,5 @@ class BankAccountLauncher {
     sc.close();
   }
 }
+
+// make BankAccount abstract class

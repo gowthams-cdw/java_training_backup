@@ -1,8 +1,10 @@
 import java.util.*;
 
 abstract class Shape {
-  static Map<String, Float> areas = new HashMap<>();
-  static Map<String, Float> perimeters = new HashMap<>();
+  static Float maxArea = Float.MIN_VALUE;
+  static String maxAreaShape;
+  static Float maxPerimeter = Float.MIN_VALUE;
+  static String maxPerimeterShape;
 
   abstract float calcArea();
 
@@ -10,24 +12,6 @@ abstract class Shape {
 
   /** Method to find max area and perimeter of the available shapes */
   static void printMax() {
-    Float maxArea = Float.MIN_VALUE;
-    String maxAreaShape = "";
-    for (Map.Entry<String, Float> entry : areas.entrySet()) {
-      if (entry.getValue() > maxArea) {
-        maxArea = entry.getValue();
-        maxAreaShape = entry.getKey();
-      }
-    }
-
-    Float maxPerimeter = Float.MIN_VALUE;
-    String maxPerimeterShape = "";
-    for (Map.Entry<String, Float> entry : areas.entrySet()) {
-      if (entry.getValue() > maxPerimeter) {
-        maxPerimeter = entry.getValue();
-        maxPerimeterShape = entry.getKey();
-      }
-    }
-
     System.out.println("Max Area: " + maxArea);
     System.out.println("Max Perimeter: " + maxPerimeter);
 
@@ -91,8 +75,9 @@ class Circle extends Shape {
    */
   float calcArea() {
     area = 3.14f * radius * radius;
-    if (!areas.containsKey("circle") || areas.get("circle") < area) {
-      areas.put("circle", area);
+    if (Shape.maxArea < area) {
+      Shape.maxArea = area;
+      Shape.maxAreaShape = "Circle";
     }
     return area;
   }
@@ -103,8 +88,9 @@ class Circle extends Shape {
    */
   float calcPerimeter() {
     perimeter = 2 * 3.14f * radius;
-    if (!perimeters.containsKey("circle") || perimeters.get("circle") < perimeter) {
-      perimeters.put("circle", perimeter);
+    if (Shape.maxPerimeter < perimeter) {
+      Shape.maxPerimeter = perimeter;
+      Shape.maxPerimeterShape = "Circle";
     }
     return perimeter;
   }
@@ -189,8 +175,9 @@ class Rectangle extends Shape {
    */
   float calcArea() {
     area = length * width;
-    if (!areas.containsKey("rectangle") || areas.get("rectangle") < area) {
-      areas.put("rectangle", area);
+    if (Shape.maxArea < area) {
+      Shape.maxArea = area;
+      Shape.maxAreaShape = "Circle";
     }
     return area;
   }
@@ -201,8 +188,9 @@ class Rectangle extends Shape {
    */
   float calcPerimeter() {
     perimeter = 2 * (length + width);
-    if (!perimeters.containsKey("rectangle") || perimeters.get("rectangle") < perimeter) {
-      perimeters.put("rectangle", perimeter);
+    if (Shape.maxPerimeter < perimeter) {
+      Shape.maxPerimeter = perimeter;
+      Shape.maxPerimeterShape = "Circle";
     }
     return perimeter;
   }
@@ -332,8 +320,9 @@ class Triangle extends Shape {
    */
   float calcArea() {
     area = 0.5f * base * height;
-    if (!areas.containsKey("triangle") || areas.get("triangle") < area) {
-      areas.put("triangle", area);
+    if (Shape.maxArea < area) {
+      Shape.maxArea = area;
+      Shape.maxAreaShape = "Circle";
     }
     return area;
   }
@@ -344,8 +333,9 @@ class Triangle extends Shape {
    */
   float calcPerimeter() {
     perimeter = side1 + side2 + side3;
-    if (!perimeters.containsKey("triangle") || perimeters.get("triangle") < perimeter) {
-      perimeters.put("triangle", perimeter);
+    if (Shape.maxPerimeter < perimeter) {
+      Shape.maxPerimeter = perimeter;
+      Shape.maxPerimeterShape = "Circle";
     }
     return perimeter;
   }
@@ -360,7 +350,7 @@ class Triangle extends Shape {
   }
 }
 
-class ShapeLauncher {
+public class ShapeLauncher {
   public static void main(String[] args) {
     Scanner sc = new Scanner(System.in);
 
@@ -458,3 +448,5 @@ class ShapeLauncher {
     sc.close();
   }
 }
+
+// remove keys like areamap and perimeter map

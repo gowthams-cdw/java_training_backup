@@ -1,4 +1,6 @@
+import java.util.NavigableMap;
 import java.util.Scanner;
+import java.util.TreeMap;
 
 class Student {
   private static int studentsCount;
@@ -80,6 +82,13 @@ class Student {
 
   /** Method to calculate grade and set it to grade */
   public void calcGrade() {
+    NavigableMap<Integer, Character> gradeMap = new TreeMap<>();
+    gradeMap.put(0, 'F');
+    gradeMap.put(60, 'C');
+    gradeMap.put(70, 'B');
+    gradeMap.put(80, 'A');
+    gradeMap.put(90, 'O');
+
     float totalMarks = 0;
 
     for (float mark : marks) {
@@ -88,17 +97,7 @@ class Student {
 
     float avgMarks = totalMarks / marks.length;
 
-    if (avgMarks >= 90) {
-      grade = 'O';
-    } else if (avgMarks >= 80) {
-      grade = 'A';
-    } else if (avgMarks >= 70) {
-      grade = 'B';
-    } else if (avgMarks >= 60) {
-      grade = 'C';
-    } else {
-      grade = 'F';
-    }
+    grade = gradeMap.floorEntry((int) avgMarks).getValue();
   }
 
   /**
@@ -116,7 +115,7 @@ class Student {
   }
 }
 
-class StudentLauncher {
+public class StudentLauncher {
   public static void main(String[] args) {
     Student s1 = new Student();
     s1.setName("s1");
@@ -154,7 +153,5 @@ class StudentLauncher {
   }
 }
 
-// javadoc
-// float
-// set marks individually
-// user input
+// y close scanner
+// remove if

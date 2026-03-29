@@ -225,7 +225,7 @@ class EngineCar extends Car {
   }
 }
 
-class VehicleLauncher {
+public class VehicleLauncher {
   public static void main(String[] args) {
     ElectricCar evc = new ElectricCar("b3", "m3", 2016, 10000, 3, true);
     System.out.println(evc);
@@ -235,5 +235,4 @@ class VehicleLauncher {
   }
 }
 
-// change class name from main to something
-// set getters and setters
+// change file names

@@ -38,7 +38,7 @@ class Employee {
    * @param name
    */
   void setName(String name) {
-    if (name == "") {
+    if (name.isEmpty()) {
       throw new Error("Invalid name.");
     }
 
@@ -96,12 +96,13 @@ class Employee {
       - Name: %s
       - Service Years: %s
       - Wage: %s
+      - Total Income: %s
     """
-        .formatted(name, serviceYears, wage);
+        .formatted(name, serviceYears, wage, totalIncome);
   }
 }
 
-class EmployeeLauncher {
+public class EmployeeLauncher {
   private static void printMenu() {
     System.out.println(
         """
@@ -122,28 +123,28 @@ class EmployeeLauncher {
     do {
       switch (choice) {
         case 1 -> {
-          Employee e = new Employee();
+          Employee employee = new Employee();
 
           sc.nextLine();
           System.out.print("Enter name: ");
-          e.setName(sc.nextLine());
+          employee.setName(sc.nextLine());
 
           System.out.print("Enter service years: ");
-          e.setServiceYears(sc.nextInt());
+          employee.setServiceYears(sc.nextInt());
 
           System.out.print("Enter wage: ");
-          e.setWage(sc.nextFloat());
+          employee.setWage(sc.nextFloat());
         }
         case 2 -> {
-          System.out.print("Enter emp id: ");
+          System.out.print("Enter employee id: ");
           int id = sc.nextInt();
 
           if (!Employee.idToEmployeeMap.containsKey(id)) {
             throw new Error("Invalid emp id");
           }
 
-          Employee e = Employee.idToEmployeeMap.get(id);
-          System.out.println(e);
+          Employee employee = Employee.idToEmployeeMap.get(id);
+          System.out.println(employee);
         }
         default -> System.out.println("Invalid choice");
       }
@@ -155,3 +156,7 @@ class EmployeeLauncher {
     sc.close();
   }
 }
+
+// .equals
+// var name
+// case syntax
