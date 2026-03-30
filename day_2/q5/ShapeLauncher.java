@@ -1,23 +1,15 @@
 import java.util.*;
 
 abstract class Shape {
-  static Float maxArea = Float.MIN_VALUE;
-  static String maxAreaShape;
-  static Float maxPerimeter = Float.MIN_VALUE;
-  static String maxPerimeterShape;
+  abstract String getName();
 
   abstract float calcArea();
 
+  abstract float getArea();
+
   abstract float calcPerimeter();
 
-  /** Method to find max area and perimeter of the available shapes */
-  static void printMax() {
-    System.out.println("Max Area: " + maxArea);
-    System.out.println("Max Perimeter: " + maxPerimeter);
-
-    System.out.println("Max Area Shape: " + maxAreaShape);
-    System.out.println("Max Perimeter Shape: " + maxPerimeterShape);
-  }
+  abstract float getPerimeter();
 }
 
 class Circle extends Shape {
@@ -25,6 +17,13 @@ class Circle extends Shape {
 
   Circle(float radius) {
     this.radius = radius;
+  }
+
+  /**
+   * @return string
+   */
+  public String getName() {
+    return "Circle";
   }
 
   /**
@@ -75,10 +74,6 @@ class Circle extends Shape {
    */
   float calcArea() {
     area = 3.14f * radius * radius;
-    if (Shape.maxArea < area) {
-      Shape.maxArea = area;
-      Shape.maxAreaShape = "Circle";
-    }
     return area;
   }
 
@@ -88,10 +83,6 @@ class Circle extends Shape {
    */
   float calcPerimeter() {
     perimeter = 2 * 3.14f * radius;
-    if (Shape.maxPerimeter < perimeter) {
-      Shape.maxPerimeter = perimeter;
-      Shape.maxPerimeterShape = "Circle";
-    }
     return perimeter;
   }
 
@@ -111,6 +102,13 @@ class Rectangle extends Shape {
   Rectangle(float length, float width) {
     this.length = length;
     this.width = width;
+  }
+
+  /**
+   * @return string
+   */
+  public String getName() {
+    return "Rectangle";
   }
 
   /**
@@ -175,10 +173,6 @@ class Rectangle extends Shape {
    */
   float calcArea() {
     area = length * width;
-    if (Shape.maxArea < area) {
-      Shape.maxArea = area;
-      Shape.maxAreaShape = "Circle";
-    }
     return area;
   }
 
@@ -188,10 +182,6 @@ class Rectangle extends Shape {
    */
   float calcPerimeter() {
     perimeter = 2 * (length + width);
-    if (Shape.maxPerimeter < perimeter) {
-      Shape.maxPerimeter = perimeter;
-      Shape.maxPerimeterShape = "Circle";
-    }
     return perimeter;
   }
 
@@ -214,6 +204,13 @@ class Triangle extends Shape {
     this.side3 = side3;
     this.base = base;
     this.height = height;
+  }
+
+  /**
+   * @return string
+   */
+  public String getName() {
+    return "Triangle";
   }
 
   /**
@@ -320,10 +317,6 @@ class Triangle extends Shape {
    */
   float calcArea() {
     area = 0.5f * base * height;
-    if (Shape.maxArea < area) {
-      Shape.maxArea = area;
-      Shape.maxAreaShape = "Circle";
-    }
     return area;
   }
 
@@ -333,10 +326,6 @@ class Triangle extends Shape {
    */
   float calcPerimeter() {
     perimeter = side1 + side2 + side3;
-    if (Shape.maxPerimeter < perimeter) {
-      Shape.maxPerimeter = perimeter;
-      Shape.maxPerimeterShape = "Circle";
-    }
     return perimeter;
   }
 
@@ -354,9 +343,12 @@ public class ShapeLauncher {
   public static void main(String[] args) {
     Scanner sc = new Scanner(System.in);
 
+    List<Shape> shapes = new LinkedList<>();
+
     System.out.print("Enter circle radius: ");
     Float radius = sc.nextFloat();
     Circle c = new Circle(radius);
+    shapes.add(c);
     c.calcArea();
     c.calcPerimeter();
 
@@ -368,6 +360,7 @@ public class ShapeLauncher {
     System.out.print("Enter rectangle width: ");
     Float width = sc.nextFloat();
     Rectangle r = new Rectangle(length, width);
+    shapes.add(r);
     r.calcArea();
     r.calcPerimeter();
 
@@ -389,6 +382,7 @@ public class ShapeLauncher {
     Float height = sc.nextFloat();
 
     Triangle t = new Triangle(side1, side2, side3, base, height);
+    shapes.add(t);
     t.calcArea();
     t.calcPerimeter();
 
@@ -440,10 +434,33 @@ public class ShapeLauncher {
       return;
     }
 
+    shapes.add(s);
     s.calcArea();
     s.calcPerimeter();
     System.out.println(s);
-    Shape.printMax();
+
+    System.out.println("All Shapes: " + shapes);
+
+    Float maxArea = Float.MIN_VALUE, maxPerimeter = Float.MIN_VALUE;
+    String maxAreaShape = "", maxPerimeterShape = "";
+    for (Shape shape : shapes) {
+      if (shape.getArea() > maxArea) {
+        maxArea = shape.getArea();
+        maxAreaShape = shape.getName();
+      }
+      if (shape.calcPerimeter() > maxPerimeter) {
+        maxPerimeter = shape.calcPerimeter();
+        maxPerimeterShape = shape.getName();
+      }
+    }
+
+    System.out.println(
+        "Shape with max area " + maxAreaShape.toLowerCase() + " with area " + maxArea);
+    System.out.println(
+        "Shape with max perimeter "
+            + maxPerimeterShape.toLowerCase()
+            + " with perimeter "
+            + maxPerimeter);
 
     sc.close();
   }
